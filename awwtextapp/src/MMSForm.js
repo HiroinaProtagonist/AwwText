@@ -33,13 +33,15 @@ class MMSForm extends Component {
                  onChange={this.onHandleChange}
               />
             </div>
+            {/* 
             <div>
               <label htmlFor="body">Body:</label>
               <textarea name="body" id="body"
               value={this.state.message.body}
               onChange={this.onHandleChange}
             />
-            </div>
+            </div> 
+            */}
             <button type="submit" disabled={this.state.submitting}>
               Send message
             </button>
@@ -62,7 +64,8 @@ class MMSForm extends Component {
         fetch('')
 
         //Send message data
-        fetch('/api/messages', {
+        //fetch('/api/messages', {
+        fetch('/api/redditMMSMessages', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

@@ -17,19 +17,11 @@ app.use(pino);
 //Ref: https://www.twilio.com/docs/runtime/quickstart/serverless-functions-make-a-read-request-to-an-external-api
 //Ref: https://www.reddit.com/dev/api/oauth#GET_top
 exports.handler = function (context, event, callback) {
-    let twiml = new Twilio.twiml.VoiceResponse();
+    let twiml = new Twilio.twiml.MessagingResponse();
   
-    // Open APIs From Space: http://open-notify.org/
-    // Number of People in Space
     axios
-      //.get(`http://api.open-notify.org/astros.json`)
       .get(`https://www.reddit.com/r/aww/top.json?t=day&limit=1`)
       .then((response) => {
-        //let { number, people } = response.data;
-        //let names = people.map((astronaut) => astronaut.name);
-        //twiml.say(`There are ${number} people in space.`);
-        //twiml.say(`They are ${names.join()}`);
-        
         let { title, name, permalink, url } = response.data;
         twiml.say(`The top /r/aww post of the day is: `);
         twiml.say(`${title}`);
@@ -45,14 +37,29 @@ exports.handler = function (context, event, callback) {
   };
 
 //routes
-app.get('/api/greeting', (req, res) => {
-    console.log(exports.handler.toString);
-  const name = req.query.name || 'World';
-  res.setHeader('Content-Type', 'application/json');
-  res.send(JSON.stringify({ greeting: `Hello ${name}!` }));
+//Sends MMS message with user-defined to phone number and prefilled data
+//https://www.twilio.com/docs/sms/send-messages#include-media-in-your-messages
+app.post('/api/redditMMSMessages', (req, res) => {
+    res.header('Content-Type', 'application/json');
+    client.messages
+    .create({
+        body: title,
+        from: process.env.TWILIO_PHONE_NUMBER,
+        mediaUrl: [url],
+        to: req.body.to
+    })
+    //.then(message => console.log(message.sid))
+    .then(() => {
+        res.send(JSON.stringify({ success: true }));
+    })
+    .catch(err => {
+      console.log(err);
+      res.send(JSON.stringify({ success: false }));
+    });
 });
 
-
+//Sends sms message with user-defined body and user-defined to phone number
+//https://www.twilio.com/blog/send-an-sms-react-twilio
 app.post('/api/messages', (req, res) => {
     res.header('Content-Type', 'application/json');
     client.messages
