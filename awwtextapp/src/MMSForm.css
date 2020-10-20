@@ -1,0 +1,23 @@
+.mms-form {
+    text-align: left;
+    padding: 1em;
+  }
+  .mms-form label {
+    display: block;
+  }
+  .mms-form input,
+  .mms-form textarea {
+    font-size: 1em;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .mms-form div {
+    margin-bottom: 0.5em;
+  }
+  .mms-form button {
+    font-size: 1em;
+    width: 100%;
+  }
+  .mms-form.error {
+    outline: 2px solid #f00;
+  }
