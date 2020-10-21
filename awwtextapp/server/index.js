@@ -1,7 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const pino = require('express-pino-logger')();
+
+const request = require('request');
+const requestPromise = require('request-promise');
 const axios = require('axios');
+const { response } = require('express');
 
 const client = require('twilio')(
     process.env.TWILIO_ACCOUNT_SID,
@@ -13,15 +17,14 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(pino);
 
-//Get top post from r/aww for the day
-//Ref: https://www.twilio.com/docs/runtime/quickstart/serverless-functions-make-a-read-request-to-an-external-api
-//Ref: https://www.reddit.com/dev/api/oauth#GET_top
+//routes
 exports.handler = function (context, event, callback) {
     let twiml = new Twilio.twiml.MessagingResponse();
-  
+
     axios
-      .get(`https://www.reddit.com/r/aww/top.json?t=day&limit=1`)
-      .then((response) => {
+        .get(`https://www.reddit.com/r/aww/top.json?t=day&limit=1`)
+        .then((response) => {
+            console.log("Response:" + response.data);
         let { title, name, permalink, url } = response.data;
         twiml.say(`The top /r/aww post of the day is: `);
         twiml.say(`${title}`);
@@ -29,51 +32,54 @@ exports.handler = function (context, event, callback) {
         twiml.say(`available at ${permalink}.`);
         
         return callback(null, twiml);
-      })
-      .catch((error) => {
+        })
+        .catch((error) => {
         console.log(error);
         return callback(error);
-      });
-  };
-
-//routes
-//Sends MMS message with user-defined to phone number and prefilled data
-//https://www.twilio.com/docs/sms/send-messages#include-media-in-your-messages
-app.post('/api/redditMMSMessages', (req, res) => {
-    res.header('Content-Type', 'application/json');
-    client.messages
-    .create({
-        body: title,
-        from: process.env.TWILIO_PHONE_NUMBER,
-        mediaUrl: [url],
-        to: req.body.to
-    })
-    //.then(message => console.log(message.sid))
-    .then(() => {
-        res.send(JSON.stringify({ success: true }));
-    })
-    .catch(err => {
-      console.log(err);
-      res.send(JSON.stringify({ success: false }));
     });
-});
+};
 
-//Sends sms message with user-defined body and user-defined to phone number
-//https://www.twilio.com/blog/send-an-sms-react-twilio
-app.post('/api/messages', (req, res) => {
-    res.header('Content-Type', 'application/json');
-    client.messages
-    .create({
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to: req.body.to,
-      body: req.body.body
-    })
-    .then(() => {
-      res.send(JSON.stringify({ success: true }));
-    })
-    .catch(err => {
-      console.log(err);
-      res.send(JSON.stringify({ success: false }));
+app.post('/api/mmsmessages', (req, res) => {
+    const options = {
+        url: 'https://www.reddit.com/r/aww/top.json?t=day&limit=1',
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type':'application/json'
+        }
+    };
+
+    return requestPromise(options)
+        .then(function(body) {
+            //console.log(JSON.parse(body));
+            
+            let redditData = JSON.parse(body);
+
+            console.log("Title: " + redditData.data.children[0].data.title + ' (' +
+                redditData.data.children[0].data.permalink + ')');
+            console.log("Image URL: " + redditData.data.children[0].data.url);
+            console.log("Is Video: " + redditData.data.children[0].data.is_video);
+            console.log("Permalink: " + redditData.data.children[0].data.permalink);
+            
+            res.header('Content-Type', 'application/json');
+            client.messages
+            .create({
+                from: process.env.TWILIO_PHONE_NUMBER,
+                to: req.body.to,
+                body: redditData.data.children[0].data.title + ' (' +
+                redditData.data.children[0].data.permalink + ')',
+                mediaUrl: [redditData.data.children[0].data.url]
+            })
+            .then(() => {
+                res.send(JSON.stringify({ success: true }));
+            })
+            .catch(err => {
+                console.log(err);
+                res.send(JSON.stringify({ success: false }));
+            })
+    
+    }).catch(function(err){
+        console.log(err);
     });
 });
 

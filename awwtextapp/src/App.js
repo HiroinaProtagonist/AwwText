@@ -7,8 +7,9 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: '',
-      greeting: ''
+      to: '',
+      body: '',
+      mediaUrl: ''
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -20,9 +21,9 @@ class App extends Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    fetch(`/api/greeting?name=${encodeURIComponent(this.state.name)}`)
-      .then(response => response.json())
-      .then(state => this.setState(state));
+    // fetch(`/api/greeting?name=${encodeURIComponent(this.state.name)}`)
+    //   .then(response => response.json())
+    //   .then(state => this.setState(state));
   }
 
   render() {

@@ -8,7 +8,8 @@ class MMSForm extends Component {
         this.state = {
           message: {
             to: '',
-            body: ''
+            body: '',
+            mediaURL: ''
           },
           submitting: false,
           error: false
@@ -33,15 +34,6 @@ class MMSForm extends Component {
                  onChange={this.onHandleChange}
               />
             </div>
-            {/* 
-            <div>
-              <label htmlFor="body">Body:</label>
-              <textarea name="body" id="body"
-              value={this.state.message.body}
-              onChange={this.onHandleChange}
-            />
-            </div> 
-            */}
             <button type="submit" disabled={this.state.submitting}>
               Send message
             </button>
@@ -59,13 +51,9 @@ class MMSForm extends Component {
     onSubmit(event) {
         event.preventDefault();
         this.setState({ submitting: true });
-        
-        //Get Reddit data first
-        fetch('')
 
         //Send message data
-        //fetch('/api/messages', {
-        fetch('/api/redditMMSMessages', {
+        fetch('/api/mmsmessages', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -79,8 +67,7 @@ class MMSForm extends Component {
                 error: false,
                 submitting: false,
                 message: {
-                  to: '',
-                  body: ''
+                  to: ''
                 }
               });
             } else {
@@ -91,7 +78,6 @@ class MMSForm extends Component {
             }
           });
       }
-
 }
 
 export default MMSForm;
