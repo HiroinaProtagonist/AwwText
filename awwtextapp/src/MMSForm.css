@@ -1,14 +1,22 @@
 .mms-form {
-    text-align: left;
+    text-align: center;
     padding: 1em;
   }
-  .mms-form label {
+
+  /* .mms-form label {
     display: block;
+  } */
+
+  #hiddenPlaceholder {
+    color: white;
+    visibility: hidden;
   }
+
   .mms-form input,
   .mms-form textarea {
     font-size: 1em;
-    width: 100%;
+    width: 20%;
+    min-width: 8em;
     box-sizing: border-box;
   }
   .mms-form div {
@@ -16,7 +24,8 @@
   }
   .mms-form button {
     font-size: 1em;
-    width: 100%;
+    width: 20%;
+    min-width: 8em;
   }
   .mms-form.error {
     outline: 2px solid #f00;

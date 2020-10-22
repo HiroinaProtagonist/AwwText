@@ -1,0 +1,29 @@
+.container {
+    display: flex;
+    flex-direction: row;
+    border-bottom: 5px solid black;
+    padding-top: 2vmin;
+    margin-left: 2vmin;
+    margin-right: 2vmin;
+    margin-bottom: 8vh;
+}
+
+a {
+    text-decoration: none;
+}
+
+.centerSpan {
+    flex-grow: 1;
+}
+
+/* Reactivate links when new pages are created */
+#about, #ack {
+    visibility: hidden;
+}
+
+a:hover {
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+    text-decoration: none;
+    font-weight: bold;
+}

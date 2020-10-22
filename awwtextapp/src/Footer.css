@@ -1,0 +1,13 @@
+.Footer{
+    /* position: fixed; */
+    /* bottom: 20px; */
+    line-height: 1em;
+    padding-top: 15vh;
+    margin: 0;
+}
+
+#footerText{
+    font-size: .75em;
+    color: black;
+    
+}

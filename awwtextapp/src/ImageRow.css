@@ -1,0 +1,14 @@
+
+#cuteLogo {
+    border-radius: 24%;
+
+    /* width: 200px; */
+    /* height: 200px; */
+    /* https://stackoverflow.com/questions/24709915/blur-the-edges-of-an-image-or-background-image-with-css */
+    box-shadow: 10 10 20px 20px white inset;
+}
+
+.titleSpan {
+    font-size: 4em;
+    font-family: 'Indie Flower', regular;
+}
