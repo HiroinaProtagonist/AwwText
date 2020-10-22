@@ -1,15 +1,19 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
-import MMSForm from './MMSForm';
+import MenuBar from './MenuBar';
+import ImageRow from './ImageRow';
+import MMSRow from './MMSRow';
+import Footer from './Footer';
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      to: '',
-      body: '',
-      mediaUrl: ''
+      message: {
+        to: '',
+        body: '',
+        mediaURL: ''
+      },
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -21,18 +25,16 @@ class App extends Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    // fetch(`/api/greeting?name=${encodeURIComponent(this.state.name)}`)
-    //   .then(response => response.json())
-    //   .then(state => this.setState(state));
   }
 
   render() {
     return (
       <div className="App">
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-
-          <MMSForm />
+          <MenuBar />
+          <ImageRow />
+          <MMSRow />
+          <Footer />
         </header>
       </div>
     );

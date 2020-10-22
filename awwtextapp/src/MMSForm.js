@@ -20,24 +20,30 @@ class MMSForm extends Component {
     
     render() {
         return (
-          <form 
-            onSubmit={this.onSubmit} 
-            className={this.state.error ? 'error mms-form' : 'mms-form'}
-          >
-            <div>
-              <label htmlFor="to">To:</label>
-              <input
-                 type="tel"
-                 name="to"
-                 id="to"
-                 value={this.state.message.to}
-                 onChange={this.onHandleChange}
-              />
-            </div>
-            <button type="submit" disabled={this.state.submitting}>
-              Send message
-            </button>
-          </form>
+          <div>
+            <span></span>
+            <form 
+              onSubmit={this.onSubmit} 
+              className={this.state.error ? 'error mms-form' : 'mms-form'}
+            >
+              <div>
+                <label htmlFor="to" >To: </label>
+                <input
+                  type="tel"
+                  name="to"
+                  id="to"
+                  placeholder = "XXXXXXXXXX"
+                  value={this.state.message.to}
+                  onChange={this.onHandleChange}
+                />
+              </div>
+              <label id="hiddenPlaceholder" htmlFor="submit">To: </label>
+              <button type="submit" disabled={this.state.submitting}>
+                Send message
+              </button>
+            </form>
+            <span></span>
+          </div>
         );
     }
 
