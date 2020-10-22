@@ -61,14 +61,18 @@ app.post('/api/mmsmessages', (req, res) => {
             console.log("Is Video: " + redditData.data.children[0].data.is_video);
             console.log("Permalink: " + redditData.data.children[0].data.permalink);
             
+            let isVideo = redditData.data.children[0].data.is_video;
+
             res.header('Content-Type', 'application/json');
             client.messages
             .create({
                 from: process.env.TWILIO_PHONE_NUMBER,
                 to: req.body.to,
-                body: redditData.data.children[0].data.title + ' (' +
-                redditData.data.children[0].data.permalink + ')',
-                mediaUrl: [redditData.data.children[0].data.url]
+                body: redditData.data.children[0].data.title + ': ' +
+                'https://www.reddit.com' + redditData.data.children[0].data.permalink,
+
+                //don't send media if media is a video (too large for mms)
+                if(isVideo){ mediaUrl: [redditData.data.children[0].data.url]}
             })
             .then(() => {
                 res.send(JSON.stringify({ success: true }));
