@@ -2,6 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const pino = require('express-pino-logger')();
 
+const path = require('path');
+
 const request = require('request');
 const requestPromise = require('request-promise');
 const axios = require('axios');
@@ -16,6 +18,23 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(pino);
+
+//for deployment to heroku
+const port = process.env.PORT || 3001;
+const publicPath = path.join(__dirname, '..', 'public');
+app.use(express.static(publicPath));
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(publicPath, 'index.html'));
+});
+
+//after building project
+//Ref: https://www.freecodecamp.org/news/deploy-a-react-node-app-to/
+// app.use(express.static(path.join(__dirname, 'build')));
+
+// app.get('/*', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'build', 'index.html'));
+// });
 
 //routes
 exports.handler = function (context, event, callback) {
@@ -87,6 +106,6 @@ app.post('/api/mmsmessages', (req, res) => {
     });
 });
 
-app.listen(3001, () =>
-  console.log('Express server is running on localhost:3001')
-);
+app.listen(port, () => {
+  console.log(`Express server is running on port ${port}.`);
+});
