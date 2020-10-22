@@ -1,7 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const pino = require('express-pino-logger')();
+
+const request = require('request');
+const requestPromise = require('request-promise');
 const axios = require('axios');
+const { response } = require('express');
 
 const client = require('twilio')(
     process.env.TWILIO_ACCOUNT_SID,
@@ -13,23 +17,14 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(pino);
 
-//Get top post from r/aww for the day
-//Ref: https://www.twilio.com/docs/runtime/quickstart/serverless-functions-make-a-read-request-to-an-external-api
-//Ref: https://www.reddit.com/dev/api/oauth#GET_top
+//routes
 exports.handler = function (context, event, callback) {
-    let twiml = new Twilio.twiml.VoiceResponse();
-  
-    // Open APIs From Space: http://open-notify.org/
-    // Number of People in Space
+    let twiml = new Twilio.twiml.MessagingResponse();
+
     axios
-      //.get(`http://api.open-notify.org/astros.json`)
-      .get(`https://www.reddit.com/r/aww/top.json?t=day&limit=1`)
-      .then((response) => {
-        //let { number, people } = response.data;
-        //let names = people.map((astronaut) => astronaut.name);
-        //twiml.say(`There are ${number} people in space.`);
-        //twiml.say(`They are ${names.join()}`);
-        
+        .get(`https://www.reddit.com/r/aww/top.json?t=day&limit=1`)
+        .then((response) => {
+            console.log("Response:" + response.data);
         let { title, name, permalink, url } = response.data;
         twiml.say(`The top /r/aww post of the day is: `);
         twiml.say(`${title}`);
@@ -37,36 +32,58 @@ exports.handler = function (context, event, callback) {
         twiml.say(`available at ${permalink}.`);
         
         return callback(null, twiml);
-      })
-      .catch((error) => {
+        })
+        .catch((error) => {
         console.log(error);
         return callback(error);
-      });
-  };
+    });
+};
 
-//routes
-app.get('/api/greeting', (req, res) => {
-    console.log(exports.handler.toString);
-  const name = req.query.name || 'World';
-  res.setHeader('Content-Type', 'application/json');
-  res.send(JSON.stringify({ greeting: `Hello ${name}!` }));
-});
+app.post('/api/mmsmessages', (req, res) => {
+    const options = {
+        url: 'https://www.reddit.com/r/aww/top.json?t=day&limit=1',
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type':'application/json'
+        }
+    };
 
+    return requestPromise(options)
+        .then(function(body) {
+            //console.log(JSON.parse(body));
+            
+            let redditData = JSON.parse(body);
 
-app.post('/api/messages', (req, res) => {
-    res.header('Content-Type', 'application/json');
-    client.messages
-    .create({
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to: req.body.to,
-      body: req.body.body
-    })
-    .then(() => {
-      res.send(JSON.stringify({ success: true }));
-    })
-    .catch(err => {
-      console.log(err);
-      res.send(JSON.stringify({ success: false }));
+            console.log("Title: " + redditData.data.children[0].data.title + ' (' +
+                redditData.data.children[0].data.permalink + ')');
+            console.log("Image URL: " + redditData.data.children[0].data.url);
+            console.log("Is Video: " + redditData.data.children[0].data.is_video);
+            console.log("Permalink: " + redditData.data.children[0].data.permalink);
+            
+            let isVideo = redditData.data.children[0].data.is_video;
+
+            res.header('Content-Type', 'application/json');
+            client.messages
+            .create({
+                from: process.env.TWILIO_PHONE_NUMBER,
+                to: req.body.to,
+                body: redditData.data.children[0].data.title + ': ' +
+                'https://www.reddit.com' + redditData.data.children[0].data.permalink,
+
+                //don't send media if media is a video (too large for mms)
+                if(isVideo){ mediaUrl: [redditData.data.children[0].data.url]}
+            })
+            .then(() => {
+                res.send(JSON.stringify({ success: true }));
+            })
+            .catch(err => {
+                console.log(err);
+                res.send(JSON.stringify({ success: false }));
+            })
+    
+    }).catch(function(err){
+        console.log(err);
     });
 });
 
